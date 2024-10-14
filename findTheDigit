@@ -13,3 +13,10 @@ if (placeNumber >0){
     const numberGot = ((numberToCheck  - (numberToCheck % exponentialOfTen)) / exponentialOfTen) % 10;
     console.log(numberGot);
 }
+
+
+//const lengthOfTheNumber = (numberToCheck + "").length;
+
+// if (0 < placeNumber && placeNumber <= lengthOfTheNumber) {
+//     console.log((numberToCheck + "")[placeNumber - 1]);
+// }
