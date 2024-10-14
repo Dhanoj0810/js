@@ -1,0 +1,14 @@
+const numberToCheck = 14278;
+const placeNumber = 4;
+let exponentialOfTen = 1;
+
+while (exponentialOfTen <= numberToCheck) {
+    exponentialOfTen = exponentialOfTen * 10;
+}
+
+for (let itrationDone = 0; itrationDone < placeNumber - 1; itrationDone++) {
+    exponentialOfTen = exponentialOfTen / 10;
+}
+if (placeNumber >0){
+    console.log(((numberToCheck % exponentialOfTen) - ((numberToCheck % exponentialOfTen) % (exponentialOfTen / 10))) / (exponentialOfTen / 10))
+}
