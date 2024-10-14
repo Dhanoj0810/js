@@ -6,7 +6,7 @@ while (exponentialOfTen <= numberToCheck) {
     exponentialOfTen = exponentialOfTen * 10;
 }
 
-for (let itrationDone = 0; itrationDone < placeNumber - 1; itrationDone++) {
+for (let iterationDone = 0; iterationDone < placeNumber - 1; iterationDone++) {
     exponentialOfTen = exponentialOfTen / 10;
 }
 if (placeNumber >0){
