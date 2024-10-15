@@ -1,22 +1,22 @@
-const numberToCheck = 14278;
-const placeNumber = 2;
-let exponentialOfTen = 1;
+const numberToCheck = 1234567890;
+const position = 1;
+let lengthOfTheNumber = 0
 
-while (exponentialOfTen <= numberToCheck) {
-    exponentialOfTen = exponentialOfTen * 10;
+while (10 ** lengthOfTheNumber <= numberToCheck) {
+    lengthOfTheNumber++;
 }
 
-for (let iterationDone = 0; iterationDone < placeNumber; iterationDone++) {
-    exponentialOfTen = exponentialOfTen / 10;
+const exponentOfTen = 10 ** (lengthOfTheNumber - position);
+
+if (position > 0 && position <= lengthOfTheNumber) {
+    const digitInNthPosition = ((numberToCheck  - (numberToCheck % exponentOfTen)) / exponentOfTen) % 10;
+    console.log(digitInNthPosition);
 }
-if (placeNumber >0){
-    const numberGot = ((numberToCheck  - (numberToCheck % exponentialOfTen)) / exponentialOfTen) % 10;
-    console.log(numberGot);
-}
 
 
-//const lengthOfTheNumber = (numberToCheck + "").length;
+// const numberInString = numberToCheck + ""
+//const lengthOfTheNumber = numberInString.length;
 
-// if (0 < placeNumber && placeNumber <= lengthOfTheNumber) {
-//     console.log((numberToCheck + "")[placeNumber - 1]);
+// if (0 < position && position <= lengthOfTheNumber) {
+//     console.log(numberInString[position - 1]);
 // }
