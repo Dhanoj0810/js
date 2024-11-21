@@ -58,11 +58,7 @@ function getGrid(startIndex, index, position1, position2, charToPrint, gameSymbo
   if (index === 1) {
     return ' 🚩 ┃';
   }
-
-  if (index % 10 === 0) {
-    return '\n┃ ' + gameSymbol + ' ┃';
-  }
-
+  
   if (index < 10) {
     if ('' + +gameSymbol === 'NaN') {
       return ' ' + gameSymbol + ' ┃';
@@ -84,34 +80,44 @@ function getHyphen(count) {
 
 function getBoard(size, position1, position2, player1, player2){
   let board = player1 + ' : ' + player1Char + '\n' + player2 + ' : ' + player2Char;
-  board += '\n┏' + getHyphen(49) + '┓\n';
   let getGameSymbol = getGameSymbol100;
+  let column = size;
 
-  if (size === 50) {
-    getGameSymbol = getGameSymbol50;
-  }
+  board = '┏' + getHyphen(49) + '┓\n';
+  
+  while(column > 0) {
+    const increment = column % 2 === 0 ? -1 : 1;
 
-  for (let index = size; index > 0; index--) {
-    const charToPrint = getChar(index, position1, position2);
-    const gameSymbol = getGameSymbol(index);
-    board += getGrid(size, index , position1, position2, charToPrint, gameSymbol);
-
-    if (index % 10 === 1) {
-      const borderChar1 = index === 1 ? '┗' : '┣';
-      const borderChar2 = index === 1 ? '┛' : '┫';
-      board += '\n' + borderChar1 + getHyphen(49) + borderChar2;
+    for (let row = 0; row < 10 && row > -10; row += increment) {
+      const index = column + row;
+      const charToPrint = getChar(index, position1, position2);
+      const gameSymbol = getGameSymbol(index);
+      
+      board += getGrid(size, index , position1, position2, charToPrint, gameSymbol);
     }
+
+    let borderChar1 = '┣';
+    let borderChar2 = '┫\n┃';
+    
+    if (column === 1 || column === 10) {
+      borderChar1 = '┗';
+      borderChar2 = '┛';  
+    }
+
+    board += '\n' + borderChar1 + getHyphen(49) + borderChar2;
+    column -= column % 2 === 0 ? 19 : 1;
   }
 
   return board;
 }
 
-function delay(times) {
+function delay(times) { 
   for (let i = 0; i < times * 1000000; i++) {}
 }
 
 function getRandomNumber() {
   const number = Math.round(Math.random() * 10);
+
   if (number >= 1 && number <= 6) {
     return number;
   }
@@ -132,6 +138,7 @@ function dice(number) {
 
 function rollDiceAndGetNumber(board) {
   let number = 0;
+  
   for (let itteration = 1; itteration < 400; itteration += 20) {
     console.clear();
     console.log(board);
@@ -146,7 +153,7 @@ function rollDiceAndGetNumber(board) {
 function showDiceAndBoard(board, diceNumber) {
   console.clear();
   console.log(board);
-  console.log('\n\n┏━━━━━━━━┓\n' + dice(diceNumber) + '\n┗━━━━━━━━┛');
+  console.log('\n\n┏'+ getHyphen(8) + '┓\n' + dice(diceNumber) + '\n┗━━━━━━━━┛');
 }
 
 function snakeAndLadderPosition100(number) {
@@ -179,9 +186,27 @@ function snakeAndLadderPosition50(number) {
   }
 }
 
+function isNumberOne(position, number) {
+  if (position !== 0) {
+    return true;
+  }
+
+  if (number === 1) {
+    return true;
+  }
+
+  return false;
+}
+
 function getPoint(player, position, sAndLPosition, winningPosition, board) {
   prompt('\n'+ player + '\'s move, press enter to roll the dice');
   const number = rollDiceAndGetNumber(board);
+
+  if (!isNumberOne(position, number)) {
+    console.log("To start game you need 1!!");
+    return 0;
+  }
+
   let positionToMove = sAndLPosition(position + number);
 
   if (position + number > winningPosition) {
@@ -203,6 +228,7 @@ function getPoint(player, position, sAndLPosition, winningPosition, board) {
 
 function printWinner(player1, player1Position, player2, winningPosition) {
   let winner = player2;
+
   if (player1Position === winningPosition) {
     winner = player1;
   }
@@ -227,13 +253,14 @@ function game() {
   let player1Position = 0;
   let player2Position = 0;
   let isAnyOneWon = player1Position === winningPosition || player2Position === winningPosition;
+  
   console.clear();
   board = getBoard(winningPosition, player1Position, player2Position, player1, player2);
   showDiceAndBoard(board, 1);
   
   while (!isAnyOneWon) {
     player1Position = getPoint(player1, player1Position, snakeAndLadderPosition, winningPosition, board);
-    
+
     console.log('\n' + player1 + ' position : ' + player1Position);
     console.log(player2 + ' position : ' + player2Position);
     
