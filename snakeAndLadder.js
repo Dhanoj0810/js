@@ -83,7 +83,7 @@ function getBoard(size, position1, position2, player1, player2){
   let getGameSymbol = getGameSymbol100;
   let column = size;
 
-  board = '┏' + getHyphen(49) + '┓\n';
+  board += '\n┏' + getHyphen(49) + '┓\n';
   
   while(column > 0) {
     const increment = column % 2 === 0 ? -1 : 1;
