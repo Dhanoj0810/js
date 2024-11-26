@@ -1,15 +1,5 @@
 const sudokuNumbers = '123456789';
 
-function isSubstring(string, subString) {
-    for (let index = 0; index <= string.length; index++) {
-      if (string[index] === subString) {
-        return true;
-      }
-    }
-
-  return false;
-}
-
 function getRandomNumber() {
   const number = Math.ceil(Math.random() * (10 - 1));
   return number;
@@ -41,77 +31,104 @@ function getHyphen(count) {
   return repeat('━', count);
 }
 
-function getInput(argument) {
-  const number = prompt(argument);
+function getInput(message) {
+  const number = prompt(message);
 
   if (isCharPresent(sudokuNumbers, number)) {
     return +number;
   }
 
   console.log('Wrong input!!\nEnter again !! : ');
-  return  getInput(argument);
+  return  getInput(message);
 }
 
 function showBoard(board) {
   console.log(board);
 }
 
-function getIndexOfColumn(index) {
+function getColumnIndices(index) {
   if (index === 1) {
     return space(3) + index;
   }
 
-  return getIndexOfColumn(index - 1) + space(3) + index;
+  return getColumnIndices(index - 1) + space(3) + index;
 }
 
-function getBoard(string) {
-  let board = space(2) +getIndexOfColumn(9);
-  board += '\n'+space(3) + '┏' + getHyphen(35) + '┓\n';
+function getRow(cellValues, rowNumber) {
+  let row = '┃';
 
-  for (let rowNum = 0; rowNum < 9; rowNum++) {
-    board += space(1) + (rowNum + 1) + space(1);
+  for (let columnNumber = 0; columnNumber < 9; columnNumber++){
+    const separator = columnNumber % 3 === 2 ? '┃' : '|';
+    const index = columnNumber + (9 * rowNumber);
 
-    for (let colNum = 0; colNum < 9; colNum++) {
-      if (colNum === 8) {
-        board += '┃ ' + string[colNum + (9 * rowNum)] + ' ┃';
-      } else {
-        board += '┃ ' + string[colNum + (9 * rowNum)] + ' ';
-      }
-    }
-
-    let borderChar1 = rowNum === 8 ? '\n   ┗' : '\n   ┣';
-    let borderChar2 = rowNum === 8 ? '┛' : '┫\n';
-
-    board += borderChar1 + getHyphen(35) + borderChar2;
+    row += space(1) + cellValues[index] + space(1) + separator;
   }
 
-  return board;
+  return row + '\n';
 }
 
-function replace(string, position, replacement) {
+function makeRowUnderLine(rowNumber) {
+  const isLastRow = rowNumber === 8;
+  const borderLeftChar = isLastRow ? '   ┗' : '   ┣';
+  const borderRightChar = isLastRow === 8 ? '┛' : '┫\n';
+
+  return borderLeftChar + getHyphen(35) + borderRightChar;
+}
+
+function getBoard(cells) {
+  // Header - column indices
+  // top border - 
+  // bottom border
+  // Body - 7 rows
+  // row - 
+  // left end and right end  - 1st row, last row, rest are exactly same
+  const gridHeader = space(2) + getColumnIndices(9);
+  const gridTopBoader = '\n'+space(3) + '┏' + getHyphen(35) + '┓\n';
+  let gridBody = '';
+
+  for (let rowNumber = 0; rowNumber < 9; rowNumber++) {
+    const rowIndex = space(1) + (rowNumber + 1) + space(1);
+    const row = getRow(cells, rowNumber);
+    const underLine = makeRowUnderLine(rowNumber);
+
+    gridBody += rowIndex + row + underLine;
+  }
+
+  return gridHeader + gridTopBoader + gridBody;
+}
+
+function replaceAt(string, position, replacement) {
   let replacedString = '';
 
   for (let index = 0; index < 81; index++) {
-    const charToAdd = string[index];
-    replacedString += index === position ? replacement : charToAdd;
+    const charToAdd = index === position ? replacement : string[index];
+    replacedString += charToAdd;
   }
 
   return replacedString;
 }
 
-function getIndexOfNumber(rPosition, cPosition) {
-  return (9 * (rPosition - 1)) + (cPosition - 1);
+function getIndexOfNumber(rowNumber, columnNumber) {
+  return (9 * (rowNumber - 1)) + (columnNumber - 1);
 }
 
 function getStartIndexOfBox(number) {
   return (Math.floor(number / 27) * 27) + ((Math.floor(number / 3) % 3) * 3);
 }
 
-function isPresentInColumn(numbers, columnNumber, number) {
+function getRowNumber(index) {
+  return Math.floor(index / 9);
+}
+
+function getColumnNumber(index) {
+  return index % 9;
+}
+
+function isPresentInColumn(cellValues, columnNumber, number) {
   const endIndex = (9  * 8) + columnNumber;
   
   for (let index = columnNumber; index <= endIndex; index += 9) {
-    if (numbers[index] * 1 === number) {
+    if (+cellValues[index] === number) {
       return true;
     }
   }
@@ -119,11 +136,11 @@ function isPresentInColumn(numbers, columnNumber, number) {
   return false;
 }
 
-function isPresentInRow(numbers, rowNumber, number) {
+function isPresentInRow(cellValues, rowNumber, number) {
   const endIndex = 9  * (rowNumber + 1);
   
   for (let index = 9 * rowNumber; index < endIndex; index++) {
-    if (+numbers[index] === number) {
+    if (+cellValues[index] === number) {
       return true;
     }
   }
@@ -131,61 +148,74 @@ function isPresentInRow(numbers, rowNumber, number) {
   return false;
 }
 
-function isPresentInBox(numbers, number, position) {
+function isPresentInBox(cellValues, number, position) {
   let startIndex = getStartIndexOfBox(position);
-  let index = startIndex;
-  
-  for (let i = 0; i < 9; i++) {
-    if (+numbers[index] === number) {
-      return true;
-    }
-    
-    index++;
-    
-    if (index === startIndex + 3) {
-      index = index + 6;
-      startIndex = index;
+  let index = startIndex + 20;
+
+  for(let boxRowStartIndex = startIndex; boxRowStartIndex < index; boxRowStartIndex +=9) {
+    for (let index = boxRowStartIndex; index < boxRowStartIndex + 3; index++) {
+      if (+cellValues[index] === number) {
+        return true;
+      }
     }
   }
+  
+  // for (let i = 0; i < 9; i++) {
+  //   if (+cellValues[index] === number) {
+  //     return true;
+  //   }
+    
+  //   index++;
+    
+  //   if (index === startIndex + 3) {
+  //     index = index + 6;
+  //     startIndex = index;
+  //   }
+  // }
   
   return false;
 }
 
-function isNewNumber(numbers, rowNumber, columnNumber, number, position) {
-  if (isPresentInRow(numbers, rowNumber, number)) {
+function isNewNumber(cellValues, number, position) {
+  const rowNumber = getRowNumber(position);
+  if (isPresentInRow(cellValues, rowNumber, number)) {
     return false;
   }
   
-  if (isPresentInColumn(numbers, columnNumber, number)) {
+  const columnNumber = getColumnNumber(position);
+
+  if (isPresentInColumn(cellValues, columnNumber, number)) {
     return false;
   }
   
-  return !isPresentInBox(numbers, number, position);
+  return !isPresentInBox(cellValues, number, position);
 }
 
-function getUserBoard(numbersForBoard) {
+function getUserBoard(cellValues) {
+  let currentCellValues = cellValues;
   const wantToSolve = confirm('You Want To Solve this sudoku : ')
   if (wantToSolve) {
-    return numbersForBoard;
+    return currentCellValues;
   }
-  
-  const number = getInput('Enter the number : ');
+
+  // Reorder - first - the position, then the number
   const rPosition = getInput('Enter row position : ');
   const cPosition = getInput('Enter column position : ');
+  const number = getInput('Enter the number : ');
   const index = getIndexOfNumber(rPosition, cPosition);
   
   console.clear();
-  numbersForBoard = replace(numbersForBoard, index, number);
-  showBoard(getBoard(numbersForBoard));
+  currentCellValues = replaceAt(currentCellValues, index, number);
+  showBoard(getBoard(currentCellValues));
   
-  return getUserBoard(numbersForBoard);
+  return getUserBoard(currentCellValues);
 }
 
-function getNewNumber(numbers, rowNumber, columnNumber, position) {
-  for (let index = 0; index < 30; index++) {
+function getNewNumber(cellValues, position) {
+  for (let itteration = 0; itteration < 30; itteration++) {
     const number = getRandomNumber();
+    const isNumberNew = isNewNumber(cellValues, number, position);
     
-    const isNumberNew = isNewNumber(numbers,rowNumber, columnNumber, number, position);
     if (isNumberNew) {
       return number;
     }
@@ -194,40 +224,45 @@ function getNewNumber(numbers, rowNumber, columnNumber, position) {
   return 0;
 }
 
-function solveSudoku(inputNumbers, row, column, index) {
-  if(row > 8) {
-    return inputNumbers;
+// is it inputNumbers ? - current state of the board
+function solveSudoku(cellValues, index) {
+  let currentCellValues = cellValues;
+
+  if(index > 80) {
+    return currentCellValues;
   }
 
-  if (inputNumbers[index] === ' ') {
-    const number = getNewNumber(inputNumbers, row, column, index);
+  if (currentCellValues[index] === ' ') {
+    
+    const number = getNewNumber(currentCellValues, index);
 
-    inputNumbers = replace(inputNumbers, index, number);
+    currentCellValues = replaceAt(currentCellValues, index, number);
   }
   
-  if (column + 1 > 8) {
-    row = row + 1;
-    column = -1;
-  }
+  // updating row and column - write a fn 
+  // if (column + 1 > 8) {
+  //   row = row + 1;
+  //   column = -1;
+  // }
   
-  return solveSudoku(inputNumbers, row, column + 1, index + 1);
+  return solveSudoku(currentCellValues, index + 1);
 }
 
 function sudokuSolver() {
-  let numbersForBoard = repeat(' ', 81);
+  const emptyCells = space(81);
 
-  showBoard(getBoard(numbersForBoard));
+  showBoard(getBoard(emptyCells));
   
-  numbersForBoard = getUserBoard(numbersForBoard);
+  const currentCellValues = getUserBoard(emptyCells);
   let isSolved = false;
-  let solvedSudokuNumbers = '';
+  let solvedCellValues = '';
 
   while (!isSolved) {
-    solvedSudokuNumbers = solveSudoku(numbersForBoard, 0, 0, 0);
-    isSolved = !isSubstring(solvedSudokuNumbers, '0');
+    solvedCellValues = solveSudoku(currentCellValues, 0);
+    isSolved = !isCharPresent(solvedCellValues, '0');
   }
 
-  showBoard(getBoard(solvedSudokuNumbers));
+  showBoard(getBoard(solvedCellValues));
 }
 
 sudokuSolver();
